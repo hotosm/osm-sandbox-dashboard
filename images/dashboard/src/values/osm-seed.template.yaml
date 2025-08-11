@@ -5,7 +5,7 @@ osm-seed:
   AWS_SSL_ARN: 'none'
   serviceType: ClusterIP
   createClusterIssuer: false
-  domain: {{BOX_NAME}}.boxes.osmsandbox.us
+  domain: {{BOX_NAME}}.boxes.osmsandbox.naxadev.com
   adminEmail: osm-sandbox-admins@googlegroups.com
   db:
     enabled: true
@@ -36,7 +36,8 @@ osm-seed:
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: www.{{BOX_NAME}}.boxes.osmsandbox.us
+    # ingressDomain: www.{{BOX_NAME}}.k3s.appzite
+    ingressDomain: www.{{BOX_NAME}}.boxes.osmsandbox.naxadev.com
     env:
       MAILER_ADDRESS: 'none'
       MAILER_DOMAIN: osmsandbox.us
@@ -54,7 +55,7 @@ osm-seed:
       WEBSITE_STATUS: "online"
       BACKUP_FILE_URL: {{SANDBOX_BACKUP_FILE_URL}}
       TM_OAUTH_CLIENT_ID: {{SANDBOX_TM_OAUTH_CLIENT_ID}}
-      TM_OAUTH_CLIENT_SECRET: {{SANDBOX_TM_OAUTH_CLIENT_SECRET}}
+      TM_OAUTH_CLIENT_SECRET_HASHED: {{SANDBOX_TM_OAUTH_CLIENT_SECRET_HASHED}}
     resources:
       enabled: false
     autoscaling:

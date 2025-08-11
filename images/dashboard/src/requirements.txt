@@ -11,6 +11,7 @@ argon2-cffi
 awscli
 pyhelm3
 kubernetes
+kr8s
 fastapi_login
 passlib
 python-jose

@@ -26,18 +26,24 @@
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Login with OpenStreetMap</button>
                         </form>
+                        <div id="tokenInfo" class="mt-4 d-none">
+                            <h4>Sandbox Access Token</h4>
+                            <div class="alert alert-info">
+                                <p><strong>Token:</strong> <span id="accessToken"></span></p>
+                                <p><strong>Expires in:</strong> <span id="expiresIn"></span> seconds</p>
+                                <p><strong>API URL:</strong> <span id="apiUrl"></span></p>
+                            </div>
+                            <button id="loginSandboxBtn" class="btn btn-success">Login to Sandbox</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let sessionId = null;
-
         document.addEventListener('DOMContentLoaded', function () {
+            // Populate box dropdown
             fetch('/v1/boxes')
                 .then(response => response.json())
                 .then(data => {
@@ -50,38 +56,83 @@
                     });
                 })
                 .catch(error => console.error('Error fetching boxes:', error));
-        });
 
-        document.getElementById('box').addEventListener('change', function (event) {
-            const box = event.target.value;
-            if (box) {
-                fetch(`/initialize_session?box=${encodeURIComponent(box)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.id) {
-                            sessionId = data.id;
-                            console.log('Session ID stored:', sessionId);
-                        } else {
-                            console.error('Failed to initialize session');
-                            alert(data.detail);
-                        }
+            // Handle form submission
+            document.getElementById('loginForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const box = document.getElementById('box').value;
+                if (!box) {
+                    alert('Please select a box');
+                    return;
+                }
+
+                // Create new session
+                fetch(`/sessions?box=${encodeURIComponent(box)}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.id) {
+                        // Redirect for OAuth with session ID as state
+                        window.location.href = `/osm_authorization?session_id=${data.id}`;
+                    } else {
+                        throw new Error('Failed to create session');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating session:', error);
+                    alert('Error creating session. Please try again.');
+                });
+            });
+
+            // Check for session_id in URL after OAuth redirect
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            
+            if (sessionId) {
+                // Retrieve sandbox token
+                fetch(`/sessions/${sessionId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Token fetch failed');
+                        return response.json();
+                    })
+                    .then(tokenData => {
+                        document.getElementById('accessToken').textContent = tokenData.access_token;
+                        document.getElementById('expiresIn').textContent = tokenData.expires_in;
+                        document.getElementById('apiUrl').textContent = tokenData.sandbox_api_url;
+                        document.getElementById('tokenInfo').classList.remove('d-none');
+                        
+                        // Store token for sandbox login
+                        sessionStorage.setItem('sandboxToken', tokenData.access_token);
+                        sessionStorage.setItem('sandboxApiUrl', tokenData.sandbox_api_url);
                     })
                     .catch(error => {
-                        console.error('Error initializing session:', error);
-                        alert('Error initializing session. Please try again.');
+                        console.error('Error fetching token:', error);
+                        alert('Failed to retrieve sandbox token. Please try logging in again.');
                     });
             }
-        });
 
-        document.getElementById('loginForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            if (sessionId) {
-                const queryString = new URLSearchParams({ "session_id": sessionId }).toString();
-                const url = `/osm_authorization?${queryString}`;
-                window.location.href = url;
-            } else {
-                alert('Please select a box and ensure session is initialized');
-            }
+            // Handle sandbox login
+            document.getElementById('loginSandboxBtn')?.addEventListener('click', function() {
+                const token = sessionStorage.getItem('sandboxToken');
+                const apiUrl = sessionStorage.getItem('sandboxApiUrl');
+                
+                if (token && apiUrl) {
+                    // Example: Use token with sandbox API
+                    fetch(`${apiUrl}/api/0.6/user/details.json`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    .then(response => response.json())
+                    .then(userData => {
+                        alert(`Logged in as ${userData.user?.display_name}`);
+                        // Redirect to sandbox UI or perform other actions
+                    })
+                    .catch(error => {
+                        console.error('Sandbox API error:', error);
+                        alert('Error accessing sandbox API');
+                    });
+                }
+            });
         });
     </script>
 </body>

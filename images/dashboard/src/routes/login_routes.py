@@ -131,10 +131,12 @@ async def redirect_sandbox(request: Request, code: str, state: str = None, db: S
                 logging.info(f"Successfully created sandbox user for: {session.user}")
             except Exception as e:
                 logging.warning(f"Could not create sandbox user: {e}")
+            logging.info(f"TM CLIENT ID: {tm_oauth_client_id}")
+            logging.info(f"TM CLIENT SECRET: {tm_oauth_client_secret}")
             
             # Get sandbox OAuth token using TM credentials and created user credentials
             try:
-                sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.us"
+                sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
                 
                 response = requests.post(
                     f"{sandbox_api_url}/oauth2/token",
@@ -214,7 +216,7 @@ def get_session(session_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Token expired")
     
     # Prepare response
-    sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.us"
+    sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
     expires_in = None
     if session.sandbox_token_expires_at:
         expires_in = int((session.sandbox_token_expires_at - datetime.now(timezone.utc)).total_seconds())
