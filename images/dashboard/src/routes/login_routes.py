@@ -131,9 +131,6 @@ async def redirect_sandbox(request: Request, code: str, state: str = None, db: S
                 logging.info(f"Successfully created sandbox user for: {session.user}")
             except Exception as e:
                 logging.warning(f"Could not create sandbox user: {e}")
-            logging.info(f"TM CLIENT ID: {tm_oauth_client_id}")
-            logging.info(f"TM CLIENT SECRET: {tm_oauth_client_secret}")
-            
             # Get sandbox OAuth token using TM credentials and created user credentials
             try:
                 sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
@@ -196,6 +193,51 @@ async def redirect_sandbox(request: Request, code: str, state: str = None, db: S
 def get_session(session_id: str, db: Session = Depends(get_db)):
     """Get sandbox OAuth token for a session (one-time use)"""
   
+    # Get session from database
+    session = db.query(Sessions).filter(Sessions.id == session_id).first()
+    if session is None:
+        logging.error(f"Session not found: {session_id}")
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Check if token exists
+    if not session.sandbox_oauth_token:
+        logging.error(f"No sandbox token found for session: {session_id}")
+        raise HTTPException(status_code=404, detail="Sandbox token not found")
+    
+    # Check if token has expired
+    if session.sandbox_token_expires_at and session.sandbox_token_expires_at < datetime.now(timezone.utc):
+        logging.error(f"Sandbox token expired for session: {session_id}")
+        # Clean up expired token
+        db.delete(session)
+        db.commit()
+        raise HTTPException(status_code=401, detail="Token expired")
+    
+    # Prepare response
+    sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
+    expires_in = None
+    if session.sandbox_token_expires_at:
+        expires_in = int((session.sandbox_token_expires_at - datetime.now(timezone.utc)).total_seconds())
+    
+    token_response = SandboxTokenResponse(
+        access_token=session.sandbox_oauth_token,
+        expires_in=expires_in,
+        sandbox_api_url=sandbox_api_url
+    )
+    
+    # One-time use: delete the session after retrieving the token
+    db.delete(session)
+    db.commit()
+    logging.info(f"Session {session_id} token retrieved and deleted")
+    
+    return token_response
+
+
+@router.get("/session/token", tags=["OSM Session Sandbox"], response_model=SandboxTokenResponse)
+def get_session_token(session_id: str = Query(..., description="Session ID"), db: Session = Depends(get_db)):
+    """
+    Retrieve (or obtain) sandbox OAuth token for a session, then delete the session (one-time use).
+    Made to use as a callback url to fetch the token and delete the session.
+    """
     # Get session from database
     session = db.query(Sessions).filter(Sessions.id == session_id).first()
     if session is None:
