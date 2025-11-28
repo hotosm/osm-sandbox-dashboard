@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-dashboard-common-env
+  namespace: {{ .Values.namespace }}
 data:
     ENVIRONMENT: {{ .Values.dashboard.env.ENVIRONMENT | quote }}
 
@@ -24,6 +25,7 @@ data:
 
     # Domian e.g boxes.osmsandbox.us
     SANDBOX_DOMAIN: {{ .Values.dashboard.env.SANDBOX_DOMAIN | quote }}
+    SANDBOX_NAMESPACE: {{ .Values.dashboard.env.SANDBOX_NAMESPACE | quote }}
 
     # Sandbox credentials
     SANDBOX_PG_DB_PORT: {{ .Values.dashboard.env.SANDBOX_PG_DB_PORT | quote }}
@@ -46,5 +48,6 @@ data:
     SANDBOX_BACKUP_FILE_URL: {{ .Values.dashboard.env.SANDBOX_BACKUP_FILE_URL | quote }}
     SANDBOX_TM_OAUTH_CLIENT_ID: {{ .Values.dashboard.env.SANDBOX_TM_OAUTH_CLIENT_ID | quote }}
     SANDBOX_TM_OAUTH_CLIENT_SECRET: {{ .Values.dashboard.env.SANDBOX_TM_OAUTH_CLIENT_SECRET | quote }}
+    SANDBOX_TM_OAUTH_CLIENT_SECRET_HASHED: {{ .Values.dashboard.env.SANDBOX_TM_OAUTH_CLIENT_SECRET_HASHED | quote }}
 
 {{- end }}

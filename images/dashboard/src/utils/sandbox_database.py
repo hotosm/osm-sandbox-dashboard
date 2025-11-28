@@ -97,7 +97,7 @@ def save_user_sandbox_db(box_name: str, user_name: str) -> str:
         box_name (str): box name
         user_name (str): user name
     """
-    pod_name = f"{box_name}-db-0"
+    pod_name = f"{box_name}-db"
     pod = Pod(pod_name)
     dev_mode = ENVIRONMENT == "development"
     if dev_mode:

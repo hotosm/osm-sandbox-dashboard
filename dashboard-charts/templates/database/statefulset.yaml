@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-dashboard-db
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ template "osm-sandbox.name" . }}
     component: db-statefulset

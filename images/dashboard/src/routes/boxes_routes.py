@@ -21,10 +21,10 @@ from schemas.boxes import BoxBase, BoxResponse
 from utils.box_helpers import update_box_state_and_age, check_release_status
 import utils.logging_config
 from utils.auth import verify_token, TokenData, verify_role
-from config import SANDBOX_DOMAIN
+from config import SANDBOX_DOMAIN, SANDBOX_NAMESPACE
 
 router = APIRouter()
-namespace = "default"
+namespace = SANDBOX_NAMESPACE
 
 
 @router.post(
