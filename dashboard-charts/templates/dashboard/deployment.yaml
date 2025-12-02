@@ -23,7 +23,7 @@ spec:
         release: {{ .Release.Name }}
         run: {{ .Release.Name }}-dashboard-web
     spec:
-      serviceAccountName: helm-service-account
+      serviceAccountName: {{ .Values.namespace }}-helm-service-account
       initContainers:
         - name: init-check-db
           image: busybox
@@ -70,6 +70,18 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-dashboard-common-env
+          volumeMounts:
+            - name: applied-templates-storage
+              mountPath: {{ .Values.dashboard.persistenceDisk.mountPath }}
+              subPath: {{ .Values.dashboard.persistenceDisk.subPath }}
+      volumes:
+        - name: applied-templates-storage
+        {{- if .Values.dashboard.persistenceDisk.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-dashboard-web-pv-claim
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
       {{- if .Values.dashboard.nodeSelector.enabled }}
       nodeSelector:
         {{ .Values.dashboard.nodeSelector.label_key }} : {{ .Values.dashboard.nodeSelector.label_value }}

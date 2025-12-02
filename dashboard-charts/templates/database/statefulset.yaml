@@ -89,7 +89,7 @@ spec:
         - name: postgres-storage
         {{- if .Values.db.persistenceDisk.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-dashboard-pv-claim
+            claimName: {{ .Release.Name }}-dashboard-db-pv-claim
         {{- else }}
           emptyDir: {}
         {{- end }}
