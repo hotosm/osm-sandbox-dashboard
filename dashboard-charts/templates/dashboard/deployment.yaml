@@ -74,6 +74,7 @@ spec:
             - name: applied-templates-storage
               mountPath: {{ .Values.dashboard.persistenceDisk.mountPath }}
               subPath: {{ .Values.dashboard.persistenceDisk.subPath }}
+          imagePullPolicy: Always
       volumes:
         - name: applied-templates-storage
         {{- if .Values.dashboard.persistenceDisk.enabled }}
