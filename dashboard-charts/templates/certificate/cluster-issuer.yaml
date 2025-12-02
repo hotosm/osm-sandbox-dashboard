@@ -1,0 +1,35 @@
+{{- if .Values.ssl_certificate.create_cluster_issuer -}}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer # I'm using ClusterIssuer here
+metadata:
+  name: letsencrypt-prod-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: nischal.naxa44@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-issuer-key
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+
+{{- end -}}
+
+{{- if .Values.ssl_certificate.create_cert -}}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: osmsandbox-global-cert
+  namespace: tm-sandbox
+spec:
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  secretName: osmsandbox-global-cert-production-secret
+  dnsNames:
+    - {{ .Values.dashboard.ingressDomain }}
+
+{{- end -}}

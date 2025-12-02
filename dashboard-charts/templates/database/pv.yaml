@@ -1,0 +1,25 @@
+{{- if .Values.db.enabled -}}
+{{- if .Values.db.persistenceDisk.enabled -}}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-dashboard-db-pv-claim
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "osm-sandbox.name" . }}
+    component: db-pd
+    environment: {{ .Values.environment }}
+    release: {{ .Release.Name }}
+spec:
+  # volumeName: {{ .Release.Name }}-dashboard-pv
+  storageClassName: {{ .Values.db.persistenceDisk.spec.storageClassName }}
+  accessModes:
+    {{- range $mode := .Values.db.persistenceDisk.spec.accessModes }}
+    - {{ $mode }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.db.persistenceDisk.spec.capacity.storage }}
+{{- end }}
+{{- end }}

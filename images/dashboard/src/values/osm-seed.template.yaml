@@ -5,7 +5,7 @@ osm-seed:
   AWS_SSL_ARN: 'none'
   serviceType: ClusterIP
   createClusterIssuer: false
-  domain: {{BOX_NAME}}.boxes.osmsandbox.naxadev.com
+  domain: {{BOX_NAME}}.{{SANDBOX_DOMAIN}}
   adminEmail: osm-sandbox-admins@googlegroups.com
   db:
     enabled: true
@@ -36,8 +36,7 @@ osm-seed:
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    # ingressDomain: www.{{BOX_NAME}}.k3s.appzite
-    ingressDomain: www.{{BOX_NAME}}.boxes.osmsandbox.naxadev.com
+    ingressDomain: www.{{BOX_NAME}}.{{SANDBOX_DOMAIN}}
     env:
       MAILER_ADDRESS: 'none'
       MAILER_DOMAIN: osmsandbox.us
