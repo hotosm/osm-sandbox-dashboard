@@ -1,0 +1,9 @@
+apiVersion: v1
+appVersion: 0.0.1
+description: OSM sandbox Deploy Chart
+home: https://github.com/osmus/osm-sandbox-deploy
+kubeVersion: '>=1.15.0-0'
+name: osm-sandbox-deploy
+sources:
+- https://github.com/osmus/osm-sandbox-deploy
+version: 0.0.1-0.dev.git.1.hde4ba02

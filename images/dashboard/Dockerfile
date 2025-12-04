@@ -10,5 +10,6 @@ COPY ./src/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 EXPOSE 8000
 COPY ./src/ /app/
+COPY ./osm-sandbox-deploy /osm-sandbox-deploy
 WORKDIR /app
 CMD ["bash", "/app/start.sh"]
