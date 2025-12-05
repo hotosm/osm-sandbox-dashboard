@@ -40,6 +40,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-dashboard-common-env
+{{- if .Values.dashboard.extraEnvFrom }}
+{{ toYaml .Values.dashboard.extraEnvFrom | indent 12 }}
+{{- end }}
       containers:
         - name: {{ .Chart.Name }}-dashboard
           image: "{{ .Values.dashboard.image.name }}:{{ .Values.dashboard.image.tag }}"
