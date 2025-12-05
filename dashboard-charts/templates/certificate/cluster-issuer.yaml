@@ -7,7 +7,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: nischal.naxa44@gmail.com
+    email: sysadmin@osm.invalid.url
     privateKeySecretRef:
       name: letsencrypt-prod-issuer-key
     solvers:
@@ -23,7 +23,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: osmsandbox-global-cert
-  namespace: tm-sandbox
+  namespace: {{ .Values.namespace }}
 spec:
   issuerRef:
     name: letsencrypt-prod
