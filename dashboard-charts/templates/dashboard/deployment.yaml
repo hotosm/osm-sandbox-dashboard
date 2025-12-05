@@ -40,8 +40,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-dashboard-common-env
-{{- if .Values.dashboard.extraEnvFrom }}
-{{ toYaml .Values.dashboard.extraEnvFrom | indent 12 }}
+{{- if .Values.extraEnvFrom }}
+{{ toYaml .Values.extraEnvFrom | indent 12 }}
 {{- end }}
       containers:
         - name: {{ .Chart.Name }}-dashboard
@@ -73,6 +73,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-dashboard-common-env
+{{- if .Values.extraEnvFrom }}
+{{ toYaml .Values.extraEnvFrom | indent 12 }}
+{{- end }}
           volumeMounts:
             - name: applied-templates-storage
               mountPath: {{ .Values.dashboard.persistenceDisk.mountPath }}

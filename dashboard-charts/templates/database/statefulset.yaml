@@ -38,8 +38,17 @@ spec:
               value: {{ .Release.Name }}-dashboard-db
             - name: POSTGRES_DB
               value: {{ .Values.db.env.POSTGRES_DB }}
+            {{- $pw := .Values.db.env.POSTGRES_PASSWORD | default "" -}}
+            {{- if ne $pw "" }}
             - name: POSTGRES_PASSWORD
-              value: {{ quote .Values.db.env.POSTGRES_PASSWORD }}
+              value: {{ $pw | quote }}
+            {{- else }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ (index .Values.extraEnvFrom 0).secretRef.name | quote }}
+                  key: POSTGRES_PASSWORD
+            {{- end }}
             - name: POSTGRES_USER
               value: {{ default "postgres" .Values.db.env.POSTGRES_USER | quote }}
             - name: PGUSER
@@ -85,6 +94,10 @@ spec:
               memory: {{ .Values.db.resources.limits.memory }}
               cpu: {{ .Values.db.resources.limits.cpu }}
           {{- end }}
+{{- if .Values.extraEnvFrom }}
+          envFrom:
+{{ toYaml .Values.extraEnvFrom | indent 12 }}
+{{- end }}
       volumes:
         - name: postgres-storage
         {{- if .Values.db.persistenceDisk.enabled }}
