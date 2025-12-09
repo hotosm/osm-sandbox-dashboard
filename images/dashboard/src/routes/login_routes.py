@@ -36,7 +36,7 @@ tm_oauth_client_secret = os.getenv("SANDBOX_TM_OAUTH_CLIENT_SECRET")  # Original
 
 router = APIRouter()
 
-domain = os.getenv("SANDBOX_DOMAIN")
+sandbox_domain = os.getenv("SANDBOX_DOMAIN", "yoursandboxdomain.here")
 
 oauth = OAuth2Session(client_id=client_id, redirect_uri=redirect_uri, scope=osm_instance_scopes)
 
@@ -133,8 +133,7 @@ async def redirect_sandbox(request: Request, code: str, state: str = None, db: S
                 logging.warning(f"Could not create sandbox user: {e}")
             # Get sandbox OAuth token using TM credentials and created user credentials
             try:
-                sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
-                
+                sandbox_api_url = f"https://api.{session.box}.{sandbox_domain}"
                 response = requests.post(
                     f"{sandbox_api_url}/oauth2/token",
                     data={
@@ -178,7 +177,7 @@ async def redirect_sandbox(request: Request, code: str, state: str = None, db: S
                 return RedirectResponse(url=end_redirect_uri)
             else:
                 # Fallback to sandbox login if no callback URL provided
-                end_redirect_uri = f"https://{session.box}.{domain}/login?user={session.user}"
+                end_redirect_uri = f"https://{session.box}.{sandbox_domain}/login?user={session.user}"
                 logging.info(f"No callback URL provided, using sandbox login for user: {session.user}")
                 return RedirectResponse(url=end_redirect_uri)
         else:
@@ -213,8 +212,7 @@ def get_session(session_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Token expired")
     
     # Prepare response
-    sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
-    expires_in = None
+    sandbox_api_url = f"https://api.{session.box}.{sandbox_domain}"
     if session.sandbox_token_expires_at:
         expires_in = int((session.sandbox_token_expires_at - datetime.now(timezone.utc)).total_seconds())
     
@@ -258,8 +256,7 @@ def get_session_token(session_id: str = Query(..., description="Session ID"), db
         raise HTTPException(status_code=401, detail="Token expired")
     
     # Prepare response
-    sandbox_api_url = f"https://api.{session.box}.boxes.osmsandbox.naxadev.com"
-    expires_in = None
+    sandbox_api_url = f"https://api.{session.box}.{sandbox_domain}"
     if session.sandbox_token_expires_at:
         expires_in = int((session.sandbox_token_expires_at - datetime.now(timezone.utc)).total_seconds())
     
