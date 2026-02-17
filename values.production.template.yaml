@@ -1,7 +1,14 @@
 environment: production
 serviceType: ClusterIP
-# createClusterIssuer: true
 adminEmail: admin@osmsandbox.us
+
+ssl_certificate:
+  create_cluster_issuer: false
+  create_cert: false
+
+service_account:
+  create: true
+
 db:
   enabled: true
   image:
@@ -10,30 +17,47 @@ db:
   nodeSelector:
     enabled: true
     label_key: nodegroup_type
-    label_value: dashboard-node
+    label_value: tm-sandbox
   env:
     POSTGRES_DB: db_dashboard
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: {{POSTGRES_PASSWORD}}
   persistenceDisk:
     enabled: true
-    accessMode: ReadWriteOnce
     mountPath: /var/lib/postgresql/data
     subPath: postgresql-db
-    AWS_ElasticBlockStore_volumeID: vol-033c268be89f2b35f
-    AWS_ElasticBlockStore_size: 10Gi
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: gp2
+      capacity:
+        storage: 1Gi
   resources:
     enabled: false
     requests:
-      memory: "10Gi"
-      cpu: "5"
+      memory: "1024Mi"
+      cpu: "1"
     limits:
-      memory: "10Gi"
-      cpu: "5"
+      memory: "1536Mi"
+      cpu: "1.5"
   sharedMemorySize: 16Mi
+
 dashboard:
+  image:
+    name: naxa/osm-sandbox-dashboard
+    tag: eks
   enabled: true
   ingressDomain: dashboard.osmsandbox.us
+  persistenceDisk:
+    enabled: true
+    mountPath: /app/values/applied
+    subPath: applied_values
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: gp2
+      capacity:
+        storage: 1Gi
   env:
     ENVIRONMENT: production
     #################### Dashboard osm auth  ####################
@@ -48,8 +72,9 @@ dashboard:
     SECRET_KEY: {{SECRET_KEY}}
     
     #################### Sandbox env vars ####################
-    OSM_SANDBOX_CHART: https://osm-sandbox.github.io/osm-sandbox-deploy/osm-sandbox-deploy-0.0.1-0.dev.git.1.hde4ba02.tgz
-    SANDBOX_NAMESPACE: 'default'
+    # OSM_SANDBOX_CHART: https://osm-sandbox.github.io/osm-sandbox-deploy/osm-sandbox-deploy-0.0.1-0.dev.git.1.hde4ba02.tgz
+    OSM_SANDBOX_CHART: /osm-sandbox-deploy
+    SANDBOX_NAMESPACE: 'tm-sandbox'
 
     #################### Sandbox Database env vars ####################
     SANDBOX_PG_DB_PORT: "5432"
@@ -59,10 +84,12 @@ dashboard:
 
     #################### Sandbox Api env vars ####################
     SANDBOX_DOMAIN: "boxes.osmsandbox.us"
+    SANDBOX_NAMESPACE: "tm-sandbox"
     SANDBOX_MAILER_ADDRESS: "none"
     SANDBOX_MAILER_DOMAIN: osmsandbox.us
     SANDBOX_MAILER_USERNAME: "none"
     SANDBOX_MAILER_PASSWORD: "none"
+    # Refer to readme for setting up OSM OAuth credentials
     SANDBOX_OSM_id_key: {{SANDBOX_OSM_id_key}}
     SANDBOX_OAUTH_CLIENT_ID: {{SANDBOX_OAUTH_CLIENT_ID}}
     SANDBOX_OAUTH_KEY: {{SANDBOX_OAUTH_KEY}}
@@ -73,7 +100,7 @@ dashboard:
     SANDBOX_NEW_RELIC_APP_NAME: "none"
     SANDBOX_ORGANIZATION_NAME: OpenStreetMap-Sandbox
     SANDBOX_WEBSITE_STATUS: "online"
-    SANDBOX_BACKUP_FILE_URL: {{SANDBOX_BACKUP_FILE_URL}}
+    SANDBOX_BACKUP_FILE_URL: {{SANDBOX_BACKUP_FILE_URL}} # URL to the DB backup file in S3 or GCS to auto restore to sandbox-db. Use case can be for pre-populating SANDBOX_OSM_id_key, CLIENT_ID, OAUTH_KEY.
     SANDBOX_TM_OAUTH_CLIENT_ID: {{SANDBOX_TM_OAUTH_CLIENT_ID}}
     SANDBOX_TM_OAUTH_CLIENT_SECRET: {{SANDBOX_TM_OAUTH_CLIENT_SECRET}}
 

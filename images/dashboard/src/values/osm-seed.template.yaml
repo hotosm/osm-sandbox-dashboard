@@ -10,7 +10,7 @@ osm-seed:
   db:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     env:
@@ -32,7 +32,7 @@ osm-seed:
   web:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     replicaCount: 1
@@ -68,7 +68,7 @@ osm-seed:
   populateApidb:
     enabled: {{SHOULD_POPULATE_DB}}
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     env:
@@ -78,7 +78,7 @@ osm-seed:
   memcached:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     resources:
