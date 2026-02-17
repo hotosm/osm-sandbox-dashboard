@@ -147,5 +147,10 @@ tests/.DS_Store
 .env
 values.dev.yaml
 values.yaml
+!**/osm-sandbox-dashboard/**/values.yaml
 values/*.yaml
-images/dashboard/src/values/values_*.yaml
+images/dashboard/src/values/applied/values_*.yaml
+
+pg_data
+
+kubeconfig.yml

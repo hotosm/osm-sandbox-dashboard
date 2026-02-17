@@ -1,0 +1,24 @@
+{{- if .Values.dashboard.enabled -}}
+{{- if .Values.dashboard.persistenceDisk.enabled -}}
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-dashboard-web-pv-claim
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "osm-sandbox.name" . }}
+    component: web-pd
+    environment: {{ .Values.environment }}
+    release: {{ .Release.Name }}
+spec:
+  storageClassName: {{ .Values.dashboard.persistenceDisk.spec.storageClassName }}
+  accessModes:
+    {{- range $mode := .Values.dashboard.persistenceDisk.spec.accessModes }}
+    - {{ $mode }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.dashboard.persistenceDisk.spec.capacity.storage }}
+{{- end }}
+{{- end }}

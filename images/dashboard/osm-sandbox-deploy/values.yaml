@@ -1,0 +1,9 @@
+osm-seed:
+  web:
+    image:
+      name: ghcr.io/osm-sandbox/osm-sandbox-web
+      tag: 0.0.1-0.dev.git.1.hde4ba02
+  populateApidb:
+    image:
+      name: ghcr.io/osm-sandbox/sandbox-populate-apidb
+      tag: 0.0.1-0.dev.git.1.hde4ba02

@@ -1,0 +1,85 @@
+{{- if .Values.tilerImposm.enabled -}}
+{{- if .Values.tilerImposm.persistenceDisk.enabled -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Release.Name }}-tiler-imposm-pv
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: tiler-imposm-pd
+    environment: {{ .Values.environment }}
+    release: {{ .Release.Name }}
+spec:
+  ############## Minikube ##############
+  {{- if eq .Values.cloudProvider "minikube" }}
+  storageClassName: local-storage
+  capacity:
+    storage: {{ .Values.tilerImposm.persistenceDisk.localVolumeSize }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.tilerImposm.persistenceDisk.localVolumeHostPath | quote }}
+  {{- end }}
+
+  ############## AWS Provider ##############
+  {{- if eq .Values.cloudProvider "aws" }}
+  storageClassName: ""
+  capacity:
+    storage: {{ .Values.tilerImposm.persistenceDisk.AWS_ElasticBlockStore_size }}
+  accessModes:
+    - ReadWriteOnce
+  awsElasticBlockStore:
+    volumeID: {{ .Values.tilerImposm.persistenceDisk.AWS_ElasticBlockStore_volumeID }}
+    fsType: ext4
+  {{- end }}
+
+  ############## GCP Provider ##############
+  {{- if eq .Values.cloudProvider "gcp" }}
+  storageClassName: ""
+  capacity:
+    storage: {{ .Values.tilerImposm.persistenceDisk.GCP_gcePersistentDisk_size }}
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: {{ .Values.tilerImposm.persistenceDisk.GCP_gcePersistentDisk_pdName }}
+    fsType: ext4
+  {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-tiler-imposm-pv-claim
+  labels:
+    app: {{ template "osm-seed.name" . }}
+    component: db-pd
+    environment: {{ .Values.environment }}
+    release: {{ .Release.Name }}
+spec:
+  ############## Minikube ##############
+  {{- if eq .Values.cloudProvider "minikube" }}
+  storageClassName: local-storage
+  {{- else }}
+  ############## Other providers ##############
+  storageClassName: ""
+  {{- end }}
+  volumeName: {{ .Release.Name }}-tiler-imposm-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      ############# Minikube ##############
+      {{- if eq .Values.cloudProvider "minikube" }}
+      storage: {{ .Values.tilerImposm.persistenceDisk.localVolumeSize }}
+      {{- end }}
+
+      ############## AWS Provider ##############
+      {{- if eq .Values.cloudProvider "aws" }}
+      storage: {{ .Values.tilerImposm.persistenceDisk.AWS_ElasticBlockStore_size }}
+      {{- end }}
+
+      ############## GCP Provider ##############
+      {{- if eq .Values.cloudProvider "gcp" }}
+      storage: {{ .Values.tilerImposm.persistenceDisk.GCP_gcePersistentDisk_size }}
+      {{- end }}
+{{- end }}
+{{- end }}

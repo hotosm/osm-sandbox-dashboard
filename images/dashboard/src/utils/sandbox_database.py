@@ -3,6 +3,10 @@ import psycopg2
 from psycopg2 import OperationalError
 from argon2 import PasswordHasher
 from datetime import datetime
+from kr8s.objects import Pod
+
+from config import ENVIRONMENT
+
 from config import (
     SANDBOX_PG_DB_PORT,
     SANDBOX_PG_DB_USER,
@@ -45,13 +49,7 @@ def check_database_instance(db_host: str) -> str:
         return f"error: {e}"
 
 
-def save_user_sandbox_db(box_name: str, user_name: str) -> str:
-    """Save a new user in the sandbox database
-
-    Args:
-        box_name (str): box name
-        user_name (str): user name
-    """
+def core_save_user_sandbox_db(box_name: str, user_name: str, host:int,  local_port: int) -> str:
     # Hash the password
     pass_crypt = argon2Hasher.hash(user_name)
     # Connect to db
@@ -59,8 +57,8 @@ def save_user_sandbox_db(box_name: str, user_name: str) -> str:
         dbname=SANDBOX_PG_DB_NAME,
         user=SANDBOX_PG_DB_USER,
         password=SANDBOX_PG_DB_PASSWORD,
-        host=f"{box_name}-db",
-        port=SANDBOX_PG_DB_PORT,
+        host=host,
+        port=local_port,
     )
     cur = conn.cursor()
     # Insert a new user
@@ -90,3 +88,23 @@ def save_user_sandbox_db(box_name: str, user_name: str) -> str:
     conn.commit()
     cur.close()
     conn.close()
+
+
+def save_user_sandbox_db(box_name: str, user_name: str) -> str:
+    """Save a new user in the sandbox database
+
+    Args:
+        box_name (str): box name
+        user_name (str): user name
+    """
+    pod_name = f"{box_name}-db"
+    pod = Pod(pod_name)
+    dev_mode = ENVIRONMENT == "development"
+    if dev_mode:
+        with pod.portforward(remote_port=5432) as local_port:
+            print("Connecting to Kubernetes API")
+            core_save_user_sandbox_db(box_name, user_name, host="127.0.0.1", local_port=local_port)
+            print("Connecting to Kubernetes API 222")
+    else:
+        core_save_user_sandbox_db(box_name, user_name, host=pod_name, local_port=5432)
+        

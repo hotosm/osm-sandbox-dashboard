@@ -4,8 +4,10 @@ services:
     image: postgres:16
     env_file:
       - ./.env
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
   dashboard:
     platform: linux/amd64
     image: rub21/osm-sandbox-dashboard:v17
@@ -16,6 +18,12 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./images/dashboard/src:/app
+      - /Users/prabin/Desktop/k3s.osmsandbox.naxadev.com.yml:/app/kubeconfig.yml:ro
     ports:
-      - '8000:8000'
+      - "8000:8000"
+    extra_hosts:
+      - daring-sheathbill:192.168.71.2
+      - k3s.appzite:13.232.119.185
+    depends_on:
+      - db
     # working_dir: /app

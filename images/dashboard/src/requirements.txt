@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 jinja2
+requests
 requests_oauthlib
 psycopg2
 argon2
@@ -10,6 +11,7 @@ argon2-cffi
 awscli
 pyhelm3
 kubernetes
+kr8s
 fastapi_login
 passlib
 python-jose

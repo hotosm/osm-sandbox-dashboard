@@ -21,17 +21,17 @@ from schemas.boxes import BoxBase, BoxResponse
 from utils.box_helpers import update_box_state_and_age, check_release_status
 import utils.logging_config
 from utils.auth import verify_token, TokenData, verify_role
-from config import SANDBOX_DOMAIN
+from config import SANDBOX_DOMAIN, SANDBOX_NAMESPACE
 
 router = APIRouter()
-namespace = "default"
+namespace = SANDBOX_NAMESPACE
 
 
 @router.post(
     "/boxes",
     tags=["Boxes"],
     response_model=BoxResponse,
-    description="Create a box in the database and release a sack in the Kubernetes cluster.",
+    description="Create and launch a new sandbox",
     dependencies=[Depends(verify_token)],
 )
 async def create_box(
@@ -206,6 +206,8 @@ async def delete_box(
             "result": result,
             "box": box_response,
         }
+    except HTTPException:
+        raise  # Re-raise HTTPExceptions without modification
     except Exception as e:
         logging.error(f"Error deleting box {box_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

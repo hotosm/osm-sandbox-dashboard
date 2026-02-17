@@ -39,7 +39,7 @@ def replace_placeholders_and_save(box_name, label_value, seed_data_file_url):
     os.environ["SHOULD_POPULATE_DB"] = str(bool(seed_data_file_url)).lower()
     os.environ["URL_FILE_TO_IMPORT"] = f'"{seed_data_file_url}"'
     
-    values_file = f"values/values_{box_name}.yaml"
+    values_file = f"values/applied/values_{box_name}.yaml"
     with open("values/osm-seed.template.yaml", "r") as file:
         file_content = file.read()
     placeholders = re.findall(r"{{(.*?)}}", file_content)
@@ -56,7 +56,7 @@ def replace_placeholders_and_save(box_name, label_value, seed_data_file_url):
 
 
 async def create_upgrade_box(box_name, namespace, values_file):
-    """Creata or upgrade box"""
+    """Create or upgrade box"""
     command = [
         "helm",
         "upgrade",

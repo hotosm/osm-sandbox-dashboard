@@ -5,12 +5,12 @@ osm-seed:
   AWS_SSL_ARN: 'none'
   serviceType: ClusterIP
   createClusterIssuer: false
-  domain: {{BOX_NAME}}.boxes.osmsandbox.us
+  domain: {{BOX_NAME}}.{{SANDBOX_DOMAIN}}
   adminEmail: osm-sandbox-admins@googlegroups.com
   db:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     env:
@@ -19,7 +19,9 @@ osm-seed:
       POSTGRES_PASSWORD: {{SANDBOX_PG_DB_PASSWORD}}
       LOG_STATEMENT: "mod"
     persistenceDisk:
-      enabled: false
+      enabled: true
+      AWS_ElasticBlockStore_size: 1Gi
+      storageClassName: gp3
     resources:
       enabled: false
     sharedMemorySize: 256Mi
@@ -30,13 +32,13 @@ osm-seed:
   web:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     replicaCount: 1
     serviceAnnotations:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-    ingressDomain: www.{{BOX_NAME}}.boxes.osmsandbox.us
+    ingressDomain: www.{{BOX_NAME}}.{{SANDBOX_DOMAIN}}
     env:
       MAILER_ADDRESS: 'none'
       MAILER_DOMAIN: osmsandbox.us
@@ -66,7 +68,7 @@ osm-seed:
   populateApidb:
     enabled: {{SHOULD_POPULATE_DB}}
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     env:
@@ -76,7 +78,7 @@ osm-seed:
   memcached:
     enabled: true
     nodeSelector:
-      enabled: true
+      enabled: false
       label_key: nodegroup_type
       label_value: {{LABEL_VALUE}}
     resources:
