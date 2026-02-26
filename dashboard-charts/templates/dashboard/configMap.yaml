@@ -18,7 +18,7 @@ data:
 
     # Dashboard Db Postgres credentials
     DB_PORT: "5432"
-    POSTGRES_HOST: {{ .Release.Name }}-dashboard-db
+    POSTGRES_HOST: {{ default (printf "%s-dashboard-db" .Release.Name) .Values.dashboard.env.POSTGRES_HOST }}
     POSTGRES_USER: {{ .Values.db.env.POSTGRES_USER | quote }}
     POSTGRES_PASSWORD: {{ .Values.db.env.POSTGRES_PASSWORD | quote }}
     POSTGRES_DB: {{ .Values.db.env.POSTGRES_DB | quote }}
