@@ -19,10 +19,10 @@ data:
     # Dashboard Db Postgres credentials
     DB_PORT: "5432"
     POSTGRES_HOST: {{ default (printf "%s-dashboard-db" .Release.Name) .Values.dashboard.env.POSTGRES_HOST }}
-    POSTGRES_USER: {{ .Values.db.env.POSTGRES_USER | quote }}
-    POSTGRES_PASSWORD: {{ .Values.db.env.POSTGRES_PASSWORD | quote }}
-    POSTGRES_DB: {{ .Values.db.env.POSTGRES_DB | quote }}
-
+    POSTGRES_USER: {{ default .Values.db.env.POSTGRES_USER .Values.dashboard.env.POSTGRES_USER }}
+    POSTGRES_PASSWORD: {{ default .Values.db.env.POSTGRES_PASSWORD .Values.dashboard.env.POSTGRES_PASSWORD }}
+    POSTGRES_DB: {{ default .Values.db.env.POSTGRES_DB .Values.dashboard.env.POSTGRES_DB }}
+    
     # Domian e.g boxes.osmsandbox.us
     SANDBOX_DOMAIN: {{ .Values.dashboard.env.SANDBOX_DOMAIN | quote }}
     SANDBOX_NAMESPACE: {{ .Values.dashboard.env.SANDBOX_NAMESPACE | quote }}
